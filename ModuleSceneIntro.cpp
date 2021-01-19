@@ -19,7 +19,9 @@ bool ModuleSceneIntro::Start()
 
 	gameBackground = App->textures->Load("Assets/Background.png");
 	title= App->textures->Load("Assets/Title.png");
+	objectives = App->textures->Load("Assets/Objectives.png");
 
+	worldState = WorldState::EARTH;
 	return ret;
 }
 
@@ -30,6 +32,23 @@ update_status ModuleSceneIntro::PreUpdate()
 	if (App->renderer->camera.y >= -0) { App->renderer->camera.y = 0; }
 
 	if (!simulating && App->input->GetKey(SDL_SCANCODE_RETURN) == KEY_DOWN) { simulating = true; }
+
+
+
+	switch (worldState)
+	{
+	case WorldState::EARTH:
+		//if (App->physics->gravity != -0.004) { App->physics->gravity = -0, 004; }
+		break;
+	case WorldState::SPACE:
+		App->physics->gravity = 0;
+		break;
+	case WorldState::MOON:
+		App->physics->gravity = 0, 002;
+		break;
+	default:
+		break;
+	}
 
 	return UPDATE_CONTINUE;
 }
@@ -46,6 +65,7 @@ update_status ModuleSceneIntro::Update()
 	{
 		App->renderer->Blit(title, 0, 2333, false);
 	}
+	else { App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y, false); }
 
 	return UPDATE_CONTINUE;
 }

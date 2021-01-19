@@ -23,8 +23,7 @@ bool ModulePhysics::Start()
 	// - You need to send it a default gravity
 	// - You need init the world in the constructor
 	// - Remember to destroy the world after using it
-	gravity = -0.004;
-	drag = 0.05;
+	gravity = -0.03;
 
 	
 	return true;

@@ -18,5 +18,4 @@ private:
 
 public:
 	float gravity;
-	float drag;
 };
