@@ -23,9 +23,10 @@ bool ModulePhysics::Start()
 	// - You need to send it a default gravity
 	// - You need init the world in the constructor
 	// - Remember to destroy the world after using it
+	gravity = -0.004;
+	drag = 0.05;
 
-
-	// TODO 4: Create a a big static circle as "ground"
+	
 	return true;
 }
 
@@ -33,6 +34,7 @@ bool ModulePhysics::Start()
 update_status ModulePhysics::PreUpdate()
 {
 	// TODO 3: Update the simulation ("step" the world)
+	if (App->player->player.x <= 0 || (App->player->player.x + App->player->player.w) >= 1024) { App->player->player.x = App->player->prePosX; }
 
 	return UPDATE_CONTINUE;
 }

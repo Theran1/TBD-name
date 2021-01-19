@@ -14,6 +14,9 @@ public:
 	bool CleanUp();
 
 private:
-
 	bool debug;
+
+public:
+	float gravity;
+	float drag;
 };
