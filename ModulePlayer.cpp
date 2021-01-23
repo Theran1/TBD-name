@@ -1,7 +1,7 @@
 #include "Globals.h"
 #include "Application.h"
 #include "ModulePlayer.h"
-#include "PhysBody.h"
+#include "ModuleSceneIntro.h"
 
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
@@ -15,54 +15,212 @@ bool ModulePlayer::Start()
 {
 	LOG("Loading player");
 	rocket = App->textures->Load("Assets/Rocket.png");
-	player = { 478,2711,23,39 };
-	accelerationX = accelerationY = speedX = speedY = 0;
+	//player.collider->rect = { 478,2711,23,39 }; //x y w h
+	player.force.SetToZero();
+	player.mass = 4.0f;
+	player.pos.x = 478;
+	player.pos.y = 2878 - 39;
+	player.pastPos.x = player.pos.x;
+	player.pastPos.y = player.pos.y;
+	
+	heDed = false;
+
+
+	if (player.collider == nullptr)
+	{
+		player.collider = new Collider({ 478,2711,23,39 }, Collider::Type::PLAYER, this);
+		App->physics->AddObject(&player);
+	}
+
+
+	
+
 	return true;
 }
 
 update_status ModulePlayer::PreUpdate()
 {
-	if (!App->scene_intro->simulating) { return UPDATE_CONTINUE; }
 
-	prePosX = player.x;
-	prePosY = player.y;
+	if (App->input->GetKey(SDL_SCANCODE_F11) == KEY_DOWN)
+	{
+		heDed = true;
+		
+	}
+	if (App->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN)  //GodMode Debug stuff
+	{
+		godLike = !godLike;
+	}
 
-	if (App->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT) { accelerationY -= 0.06; }
-	if (App->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT) { accelerationY += 0.06; }
-	if (App->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT) { accelerationX -= 0.03; }
-	if (App->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT) { accelerationX += 0.03; }
+	if (!heDed)
+	{
 
-	accelerationY -= App->physics->gravity;
+		if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
+		{
+			player.force.y = -500.0f * player.mass;
+		}
+		if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		{
+			player.force.x = -500.0f * player.mass;
+		}
+		if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
+		{
+			player.force.y = 500.0f * player.mass;
+		}
+		if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		{
+			player.force.x = 500.0f * player.mass;
+		}
 
-	if (accelerationX !=  0) { accelerationX = accelerationX * 0.95; }
+	}
+	else
+	{
+		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
+		{
+			player.pos.x = 478;
+			player.pos.y = 2878 - 39;
+			player.pastPos.x = player.pos.x;
+			player.pastPos.y = player.pos.y;
+			player.force.SetToZero();
+			
+			heDed = false;
 
-	if (accelerationX > 2) { accelerationX = 2; }
-	if (accelerationY > 2) { accelerationY = 2; }
-	if (accelerationX < -2) { accelerationX = -2; }
-	if (accelerationY < -2) { accelerationY = -2; }
+			if (player.collider == nullptr)
+			{
+				player.collider = new Collider({ 478,2711,23,39 }, Collider::Type::PLAYER, this);
+				App->physics->AddObject(&player);
+			}
+			App->scene_intro->worldState = WorldState::EARTH;
+			//App->scene_intro->CreateEarth();
+		}
+	}
 
-	speedX += accelerationX;
-	speedY += accelerationY;
-
-	if (speedX > 4) { speedX = 4; }
-	if (speedY > 8) { speedY = 8; }
-	if (speedX < -4) { speedX = -4; }
-	if (speedY < -8) { speedY = -8; }
-
-	if (speedX != 0) { speedX = speedX * 0.95; }
-
-	player.x += speedX;
-	player.y += speedY;
 
 	return UPDATE_CONTINUE;
 }
 
-update_status ModulePlayer::Update()
+
+update_status ModulePlayer::Update(float dt)
 {
-	App->renderer->Blit(rocket, player.x, player.y, false);
+
+	/* if you want animations to go with framerate: dtAnim = dt;*/
+	if (!heDed)
+	{
+		//Player boundries
+		if ((player.pos.x) <= 0) //Left bound
+		{
+			player.pos.x = 1;
+			player.speed.x = 0;
+		
+		}
+		if ((player.pos.x + player.collider->rect.w) > (App->renderer->camera.w)) //Right bound
+		{
+			player.pos.x = App->renderer->camera.w - player.collider->rect.w - 1;
+			player.speed.x = 0;
+			
+		}
+		if ((player.pos.y) <= 0) //Up bound
+		{
+			player.pos.y = 1;
+			player.speed.y = 0;
+		}
+		if ((player.pos.y + player.collider->rect.h) > (3179)) //Bottom bound
+		{
+			player.pos.y = 3179 - player.collider->rect.h - 1;
+			player.speed.y = 0;
+		}
+
+
+		//Speed limits
+		if (player.speed.y > 400.0f)
+			player.speed.y = 400.0f;
+		else if (player.speed.y < -400.0f)
+			player.speed.y = -400.0f;
+		if (player.speed.x > 400.0f)
+			player.speed.x = 400.0f;
+		else if (player.speed.x < -400.0f)
+			player.speed.x = -400.0f;
+		//LOG("%f,%f", player.speed.x, player.speed.y);
+
+		
+		if (touchingTheWatah && touchedDaMoon && abs((int)player.speed.y) <= 1.0f && abs((int)player.pastSpeed.y) <= 1.0f)                 // Victory
+		{
+			//win or smt idk
+			LOG("YOUWISJKAFGHJGAHSJFGASDHVGFJJHSVADHJVSEHIJKFSDKHJFFBDKBHJKDHBFJHMSDB FNJMBSDFJHSDFUHJG");
+		}
+
+	}
+	else  //he is F*^**** dead
+
+	{
+		if (player.collider != nullptr)
+		{
+			App->physics->RemoveObject(&player);
+		}
+		player.speed.x = 0.0f;
+		player.speed.y = 0.0f;
+
+	
+	}
+
+
 	return UPDATE_CONTINUE;
 }
 
+
+
+update_status ModulePlayer::PostUpdate()
+{
+	App->renderer->Blit(rocket, player.pos.x, player.pos.y, false);
+
+
+	if (App->physics->debug && player.collider != nullptr)
+		App->renderer->DrawQuad(player.collider->rect, 0, 225, 100, 100);
+
+	//need dead animation if we gonna use one, use the "heDed" bool
+
+	return UPDATE_CONTINUE;
+}
+
+void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
+{
+	LOG("player state %d", App->scene_intro->worldState);
+	if (!godLike)
+	{
+		if (App->scene_intro->worldState == WorldState::EARTH)
+		{
+			if (c2->type == Collider::Type::SOLID)
+			{
+				if (abs((int)player.pastSpeed.y) >= 300.0f)
+				{
+					heDed = true;
+				}
+				LOG("Solid!");
+			}
+		}
+		if (App->scene_intro->worldState == WorldState::SPACE)
+		{
+			/*if (c2->type == Collider::Type::OBSTACLE)
+			{
+				heDed = true;
+			}*/
+		}
+		if (App->scene_intro->worldState == WorldState::MOON)
+		{
+			if (c2->type == Collider::Type::MOON)
+			{
+				if (abs((int)player.pastSpeed.y) >= 300.0f)
+				{
+					heDed = true;
+				}
+				touchedDaMoon = true;
+				LOG("Da Moon");
+			}
+		}
+	}
+
+
+
+}
 
 
 bool ModulePlayer::CleanUp()

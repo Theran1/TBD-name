@@ -4,6 +4,11 @@
 #include "p2DynArray.h"
 #include "Globals.h"
 
+class Collider;
+struct Object;
+
+
+
 enum class WorldState
 {
 	EARTH,
@@ -21,8 +26,10 @@ public:
 
 	bool Start();
 	update_status PreUpdate();
-	update_status Update();
+	update_status Update(float dt);
+	update_status PostUpdate();
 	bool CleanUp();
+	void OnCollision(Collider* c1, Collider* c2);
 
 public:
 
@@ -31,6 +38,10 @@ public:
 	SDL_Texture* objectives;
 
 	WorldState worldState;
+
+	Object moon;
+	Object land;
+	Object water;
 
 	bool simulating;
 };

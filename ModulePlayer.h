@@ -3,18 +3,11 @@
 #include "Animation.h"
 #include "Globals.h"
 #include "p2Point.h"
+#include "ModulePhysics.h"
 
-class PhysBody;
+class Collider;
+struct Object;
 
-struct Object
-{
-	SDL_Texture* graphic;
-	PhysBody* body;
-	uint fx;
-
-	Object() : graphic(NULL), body(NULL)
-	{}
-};
 
 class ModulePlayer : public Module
 {
@@ -24,16 +17,28 @@ public:
 
 	bool Start();
 	update_status PreUpdate();
-	update_status Update();
+	update_status Update(float dt);
+	update_status PostUpdate();
 	bool CleanUp();
+	void OnCollision(Collider* c1, Collider* c2);
 
 public:
-	int prePosX = 0;
-	int prePosY = 0;
+
+	Object player; 
+	
+	//the width and height of the player is within the object (use player.collider.rect.w for example
+
+	bool godLike;
+	bool heDed;
+	bool touchedDaMoon = false;
+	bool touchingTheWatah = false;
+	
 	SDL_Texture* rocket;
-	SDL_Rect player;
-	float accelerationX;
+	//SDL_Rect player;
+	/*float accelerationX;
 	float accelerationY;
 	float speedX;
-	float speedY;
+	float speedY;*/
+	
+
 };
