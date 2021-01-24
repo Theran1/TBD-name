@@ -5,6 +5,7 @@
 
 #define WATER_DENSITY_LEVEL 0.018
 #define DAMPENING_COEFICIENT 0.98
+#define DRAG_FORCE 500.0f
 
 
 class Collider
@@ -71,6 +72,8 @@ public:
 	update_status PostUpdate();
 	bool CleanUp();
 
+	void UpdateDrag(fPoint direction);
+
 
 	void UpdatePhysics(Object* object, float dt);
 
@@ -92,6 +95,7 @@ private:
 public:
 	fPoint gravity;
 	bool debug;
+	fPoint dragDirection;
 
 private:
 	// All existing objects in the scene

@@ -85,19 +85,18 @@ update_status ModuleSceneIntro::PreUpdate()
         simulating = true; 
     }
 
-	//Poner aqui condiciones para cambiar de "worldState"
+
 	
 	if (App->player->player.pos.y <= 1965 && worldState == WorldState::EARTH) {
 		worldState = WorldState::SPACE;
 	}
-	 if (App->player->player.pos.y <= 650 && worldState == WorldState::SPACE) {
+	if (App->player->player.pos.y <= 650 && worldState == WorldState::SPACE) {
 		worldState = WorldState::MOON;
-
 	}
-	 if (App->player->player.pos.y >= 650 && worldState == WorldState::MOON) {
+	if (App->player->player.pos.y >= 650 && worldState == WorldState::MOON) {
 		worldState = WorldState::SPACE;
 	}
-	 if (App->player->player.pos.y >= 1965 && worldState == WorldState::SPACE) {
+	if (App->player->player.pos.y >= 1965 && worldState == WorldState::SPACE) {
 		worldState = WorldState::EARTH;
 	}
 

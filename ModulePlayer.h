@@ -21,6 +21,7 @@ public:
 	update_status PostUpdate();
 	bool CleanUp();
 	void OnCollision(Collider* c1, Collider* c2);
+	void UpdateDrag();
 
 public:
 
@@ -36,16 +37,19 @@ public:
 	bool touchingTheWatah = false;
 	bool once = true;
 
+
+	fPoint direction;
+
+	bool isMovingUp;
+	bool isMovingLeft;
+	bool isMovingRight;
+	bool isMovingDown;
+
+
 	Animation explosion;
 	Animation* currentAnimation;
 
 	unsigned int explosionSFX;
 
-	//SDL_Rect player;
-	/*float accelerationX;
-	float accelerationY;
-	float speedX;
-	float speedY;*/
-	
 
 };

@@ -235,6 +235,21 @@ void ModulePhysics::UpdatePhysics(Object* object, float dt)
 		object->collider->SetPos(object->pos.x, object->pos.y, object->collider->rect.w, object->collider->rect.h);
 
 	}
+
+
+	if (object->collider->type == Collider::Type::PLAYER)
+	{
+		if (object->speed.y < 0)
+		{
+			App->player->isMovingUp = true;
+			App->player->isMovingDown = false;
+		}
+		else
+		{
+			App->player->isMovingUp = false;
+			App->player->isMovingDown = true;
+		}
+	}
 	
 }
 
@@ -388,3 +403,9 @@ bool ModulePhysics::Intersects(Object* A, Object* B)
 
 }
  
+
+void ModulePhysics::UpdateDrag(fPoint direction)
+{
+	dragDirection.x = (direction.x != 0 ? -1 * direction.x : 0);
+	dragDirection.y = (direction.y != 0 ? -1 * direction.y : 0);
+}

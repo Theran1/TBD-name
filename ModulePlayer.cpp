@@ -43,6 +43,12 @@ bool ModulePlayer::Start()
 		App->physics->AddObject(&player);
 	}
 
+
+	isMovingUp = false;
+	isMovingLeft = false;
+	isMovingRight = false;
+	isMovingDown = false;
+
 	return true;
 }
 
@@ -65,20 +71,35 @@ update_status ModulePlayer::PreUpdate()
 		if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
 		{
 			player.force.y = -500.0f * player.mass;
+			/*isMovingUp = true;
+			isMovingDown = false;*/
 		}
 		if (App->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 		{
 			player.force.x = -500.0f * player.mass;
+			/*isMovingLeft = true;
+			isMovingRight = false;*/
 		}
 		if (App->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT)
 		{
 			player.force.y = 500.0f * player.mass;
+			/*isMovingDown = true;
+			isMovingUp = false;*/
 		}
 		if (App->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 		{
 			player.force.x = 500.0f * player.mass;
+			/*isMovingRight = true;
+			isMovingLeft = false;*/
 		}
 
+
+
+		UpdateDrag();
+		if (App->scene_intro->worldState == WorldState::EARTH) {
+			player.force.x = player.force.x + App->physics->dragDirection.x * DRAG_FORCE;
+			player.force.y = player.force.y + App->physics->dragDirection.y * DRAG_FORCE;
+		}
 	}
 	else
 	{
@@ -195,7 +216,7 @@ update_status ModulePlayer::PostUpdate()
 
 void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 {
-	LOG("player state %d", App->scene_intro->worldState);
+	//LOG("player state %d", App->scene_intro->worldState);
 	if (!godLike)
 	{
 		if (App->scene_intro->worldState == WorldState::EARTH)
@@ -206,7 +227,7 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 				{
 					heDed = true;
 				}
-				LOG("Solid!");
+				//LOG("Solid!");
 			}
 		}
 		if (App->scene_intro->worldState == WorldState::SPACE)
@@ -225,7 +246,7 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 					heDed = true;
 				}
 				touchedDaMoon = true;
-				LOG("Da Moon");
+				//LOG("Da Moon");
 			}
 		}
 	}
@@ -242,4 +263,47 @@ bool ModulePlayer::CleanUp()
 	App->textures->Unload(explosionTexture);
 
 	return true;
+}
+
+
+
+void ModulePlayer::UpdateDrag()
+{
+	if (isMovingRight == true && isMovingUp == true) {//TopRight Direction +,-
+		//direction = { 1.0f,-1.0f };
+		direction.x = 1.0f;
+		direction.y = -1.0f;
+	}
+	else if (isMovingRight == true && isMovingDown == true) { //BottomRight Direction +,+
+		//direction = { -1.0f,-1.0f };
+		direction.x = -1.0f;
+		direction.y = -1.0f;
+	}
+	else if (isMovingLeft == true && isMovingDown == true) {//BottomLeft Direction -,+
+		//direction = { -1.0f,1.0f };
+		direction.x = -1.0f;
+		direction.y = 1.0f;
+	}
+	else if (isMovingLeft == true && isMovingUp == true) {//TopLeft Direction -,-
+		direction.x = 1.0f;
+		direction.y = 1.0f;
+	}
+	else if (isMovingDown == true) {
+		direction.x = 0.0f;
+		direction.y = 1.0f;
+	}
+	else if (isMovingUp == true) {
+		direction.x = 0.0f;
+		direction.y = -1.0f;
+	}
+	else if (isMovingRight == true) {		
+		direction.x = 1.0f;
+		direction.y = 0.0f;
+	}
+	else if (isMovingLeft == true) {
+		direction.x = -1.0f;
+		direction.y = 0.0f;
+	}
+
+	App->physics->UpdateDrag(direction);
 }
