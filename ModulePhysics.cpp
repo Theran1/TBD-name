@@ -8,9 +8,6 @@
 
 ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app, start_enabled)
 {
-	
-
-
 	matrix[Collider::Type::SOLID][Collider::Type::SOLID] = false;
 	matrix[Collider::Type::SOLID][Collider::Type::WATER] = false;
 	matrix[Collider::Type::SOLID][Collider::Type::MOON] = false;

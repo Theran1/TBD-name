@@ -28,16 +28,19 @@ public:
 	
 	//the width and height of the player is within the object (use player.collider.rect.w for example
 	SDL_Texture* explosionTexture = nullptr;
+	SDL_Texture* rocket;
 
 	bool godLike;
 	bool heDed;
 	bool touchedDaMoon = false;
 	bool touchingTheWatah = false;
+	bool once = true;
 
 	Animation explosion;
 	Animation* currentAnimation;
 
-	SDL_Texture* rocket;
+	unsigned int explosionSFX;
+
 	//SDL_Rect player;
 	/*float accelerationX;
 	float accelerationY;

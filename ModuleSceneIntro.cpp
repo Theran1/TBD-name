@@ -23,6 +23,8 @@ bool ModuleSceneIntro::Start()
 	title= App->textures->Load("Assets/Title.png");
 	objectives = App->textures->Load("Assets/Objectives.png");
 	gameOver = App->textures->Load("Assets/GameOver.png");
+	gameCompleted = App->textures->Load("Assets/GameComplete.png");
+	App->audio->PlayMusic("Assets/StarlaneStroll.ogg");
 
 	srand(time(NULL));
 
@@ -66,6 +68,8 @@ bool ModuleSceneIntro::Start()
 	}
 
 	simulating = false;
+	completed = false;
+	objectivesCompleted = 0;
 
 	return ret;
 }
@@ -99,14 +103,19 @@ update_status ModuleSceneIntro::PreUpdate()
 
 	 deathHeight = -App->renderer->camera.y;
 	//LOG("Player poj %d %d", App->player->player.pos.x, App->player->player.pos.y);
-	
 
 	return UPDATE_CONTINUE;
 }
 
 update_status ModuleSceneIntro::Update(float dt)
 {
-	
+	if (App->scene_intro->objectivesCompleted == 0 && App->player->player.pos.y <= 1900) { App->scene_intro->objectivesCompleted = 1; }
+	if (App->player->touchedDaMoon && objectivesCompleted == 1) { App->scene_intro->objectivesCompleted = 2; }
+	if (App->player->touchingTheWatah && objectivesCompleted == 2)
+	{
+		objectivesCompleted = 3;
+		completed = true;
+	}
 	return UPDATE_CONTINUE;
 }
 
@@ -132,9 +141,25 @@ update_status ModuleSceneIntro::PostUpdate()
 		App->physics->Enable();
 		App->player->Enable();
 		//worldState = WorldState::EARTH;
-		App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y, false);
-	}
 
+		//Objectives
+		if (!App->player->heDed)
+		{
+			App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y, &objectivesRectangle);
+			switch (objectivesCompleted)
+			{
+			case 3:
+				App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y + 134, &objectiveThree);
+			case 2:
+				App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y + 86, &objectiveTwo);
+			case 1:
+				App->renderer->Blit(objectives, -App->renderer->camera.x, -App->renderer->camera.y + 38, &objectiveOne);
+				break;
+			default:
+				break;
+			}
+		}
+	}
 	if (App->physics->debug && land.collider != nullptr)
 		App->renderer->DrawQuad(land.collider->rect, 255, 0, 0, 100);
 
@@ -146,9 +171,13 @@ update_status ModuleSceneIntro::PostUpdate()
 
 	if (App->player->heDed)
 	{
-		//App->renderer->Blit(gameOverTxt, 0, App->renderer->camera.h / 2 - 90, false);
 		App->renderer->Blit(gameOver, 60, deathHeight + 200, false);
 	}
+	if (completed)
+	{
+		App->renderer->Blit(gameCompleted, -App->renderer->camera.x+100, -App->renderer->camera.y + 200, nullptr);
+	}
+
 	return UPDATE_CONTINUE;
 }
 
@@ -157,11 +186,13 @@ bool ModuleSceneIntro::CleanUp()
 	LOG("Unloading Intro scene");
 
 	//unload textures
-
-	//unload sounds
+	App->textures->Unload(gameBackground);
+	App->textures->Unload(title);
+	App->textures->Unload(objectives);
+	App->textures->Unload(gameOver);
+	App->textures->Unload(gameCompleted);
 
 	//delete Objects
-
 
 
 	return true;

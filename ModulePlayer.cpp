@@ -26,6 +26,7 @@ bool ModulePlayer::Start()
 	heDed = false;
 
 	explosionTexture = App->textures->Load("Assets/Explosion.png");
+	explosionSFX = App->audio->LoadFx("Assets/Explosion.wav");
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -58,7 +59,7 @@ update_status ModulePlayer::PreUpdate()
 		godLike = !godLike;
 	}
 
-	if (!heDed)
+	if (!heDed && !App->scene_intro->completed)
 	{
 
 		if (App->input->GetKey(SDL_SCANCODE_W) == KEY_REPEAT)
@@ -81,8 +82,6 @@ update_status ModulePlayer::PreUpdate()
 	}
 	else
 	{
-
-
 		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
 		{
 			player.pos.x = 478;
@@ -92,6 +91,10 @@ update_status ModulePlayer::PreUpdate()
 			player.force.SetToZero();
 			explosion.Reset();
 			heDed = false;
+			once = true;
+			touchedDaMoon = false;
+			App->scene_intro->completed = false;
+			App->scene_intro->objectivesCompleted = 0;
 
 			if (player.collider == nullptr)
 			{
@@ -149,17 +152,20 @@ update_status ModulePlayer::Update(float dt)
 			player.speed.x = -400.0f;
 		//LOG("%f,%f", player.speed.x, player.speed.y);
 
-		
-		if (touchingTheWatah && touchedDaMoon && abs((int)player.speed.y) <= 1.0f && abs((int)player.pastSpeed.y) <= 1.0f)                 // Victory
-		{
-			//win or smt idk
-			LOG("YOUWISJKAFGHJGAHSJFGASDHVGFJJHSVADHJVSEHIJKFSDKHJFFBDKBHJKDHBFJHMSDB FNJMBSDFJHSDFUHJG");
-		}
+		//if (touchingTheWatah && touchedDaMoon && abs((int)player.speed.y) <= 1.0f && abs((int)player.pastSpeed.y) <= 1.0f)                 // Victory
+		//{
+		//	//win or smt idk
+		//	LOG("YOUWISJKAFGHJGAHSJFGASDHVGFJJHSVADHJVSEHIJKFSDKHJFFBDKBHJKDHBFJHMSDB FNJMBSDFJHSDFUHJG");
+		//}
 
 	}
 	else  //he is F*^**** dead
-
 	{
+		if (once)
+		{
+			App->audio->PlayFx(explosionSFX, 0);
+			once = false;
+		}
 		if (player.collider != nullptr)
 		{
 			App->physics->RemoveObject(&player);
@@ -232,6 +238,8 @@ void ModulePlayer::OnCollision(Collider* c1, Collider* c2)
 bool ModulePlayer::CleanUp()
 {
 	LOG("Unloading player");
+	App->textures->Unload(rocket);
+	App->textures->Unload(explosionTexture);
 
 	return true;
 }

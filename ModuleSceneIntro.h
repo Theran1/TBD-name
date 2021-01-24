@@ -37,6 +37,7 @@ public:
 	SDL_Texture* title;
 	SDL_Texture* objectives;
 	SDL_Texture* gameOver;
+	SDL_Texture* gameCompleted;
 
 	WorldState worldState;
 
@@ -47,4 +48,11 @@ public:
 	int deathHeight;
 
 	bool simulating;
+	bool completed;
+	int objectivesCompleted;
+
+	SDL_Rect objectivesRectangle = { 0,0,493,148 };
+	SDL_Rect objectiveOne = { 0,171,224,16 };
+	SDL_Rect objectiveTwo = { 0,219,367,16 };
+	SDL_Rect objectiveThree = { 0,267,493,14 };
 };
