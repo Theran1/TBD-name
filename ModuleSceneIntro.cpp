@@ -22,6 +22,7 @@ bool ModuleSceneIntro::Start()
 	gameBackground = App->textures->Load("Assets/Background.png");
 	title= App->textures->Load("Assets/Title.png");
 	objectives = App->textures->Load("Assets/Objectives.png");
+	gameOver = App->textures->Load("Assets/GameOver.png");
 
 	srand(time(NULL));
 
@@ -96,6 +97,7 @@ update_status ModuleSceneIntro::PreUpdate()
 		worldState = WorldState::EARTH;
 	}
 
+	 deathHeight = -App->renderer->camera.y;
 	//LOG("Player poj %d %d", App->player->player.pos.x, App->player->player.pos.y);
 	
 
@@ -125,7 +127,8 @@ update_status ModuleSceneIntro::PostUpdate()
 	{
 		App->renderer->Blit(title, 0, 2333, false);
 	}
-	else { 
+	else
+	{
 		App->physics->Enable();
 		App->player->Enable();
 		//worldState = WorldState::EARTH;
@@ -144,9 +147,9 @@ update_status ModuleSceneIntro::PostUpdate()
 	if (App->player->heDed)
 	{
 		//App->renderer->Blit(gameOverTxt, 0, App->renderer->camera.h / 2 - 90, false);
+		App->renderer->Blit(gameOver, 60, deathHeight + 200, false);
 	}
-       
-    return UPDATE_CONTINUE;
+	return UPDATE_CONTINUE;
 }
 
 bool ModuleSceneIntro::CleanUp()

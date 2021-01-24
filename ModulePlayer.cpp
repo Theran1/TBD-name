@@ -25,15 +25,22 @@ bool ModulePlayer::Start()
 	
 	heDed = false;
 
+	explosionTexture = App->textures->Load("Assets/Explosion.png");
+
+	for (int i = 0; i < 8; i++)
+	{
+		explosion.PushBack({ i * 39,0,39,39 });
+	}
+	explosion.SetSpeed(0.2f);
+	explosion.SetLoop(false);
+
+	currentAnimation = &explosion;
 
 	if (player.collider == nullptr)
 	{
 		player.collider = new Collider({ 478,2711,23,39 }, Collider::Type::PLAYER, this);
 		App->physics->AddObject(&player);
 	}
-
-
-	
 
 	return true;
 }
@@ -74,6 +81,8 @@ update_status ModulePlayer::PreUpdate()
 	}
 	else
 	{
+
+
 		if (App->input->GetKey(SDL_SCANCODE_R) == KEY_DOWN)
 		{
 			player.pos.x = 478;
@@ -81,7 +90,7 @@ update_status ModulePlayer::PreUpdate()
 			player.pastPos.x = player.pos.x;
 			player.pastPos.y = player.pos.y;
 			player.force.SetToZero();
-			
+			explosion.Reset();
 			heDed = false;
 
 			if (player.collider == nullptr)
@@ -129,7 +138,6 @@ update_status ModulePlayer::Update(float dt)
 			player.speed.y = 0;
 		}
 
-
 		//Speed limits
 		if (player.speed.y > 400.0f)
 			player.speed.y = 400.0f;
@@ -158,8 +166,6 @@ update_status ModulePlayer::Update(float dt)
 		}
 		player.speed.x = 0.0f;
 		player.speed.y = 0.0f;
-
-	
 	}
 
 
@@ -170,14 +176,14 @@ update_status ModulePlayer::Update(float dt)
 
 update_status ModulePlayer::PostUpdate()
 {
-	App->renderer->Blit(rocket, player.pos.x, player.pos.y, false);
+	if (heDed)
+	{
+		currentAnimation->Update();
+		App->renderer->Blit(explosionTexture, player.pos.x - 8, player.pos.y, &currentAnimation->GetCurrentFrame());
+	}
+	else { App->renderer->Blit(rocket, player.pos.x, player.pos.y, false); }
 
-
-	if (App->physics->debug && player.collider != nullptr)
-		App->renderer->DrawQuad(player.collider->rect, 0, 225, 100, 100);
-
-	//need dead animation if we gonna use one, use the "heDed" bool
-
+	if (App->physics->debug && player.collider != nullptr) { App->renderer->DrawQuad(player.collider->rect, 0, 225, 100, 100); }
 	return UPDATE_CONTINUE;
 }
 

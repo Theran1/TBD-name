@@ -36,12 +36,15 @@ public:
 	SDL_Texture* gameBackground;
 	SDL_Texture* title;
 	SDL_Texture* objectives;
+	SDL_Texture* gameOver;
 
 	WorldState worldState;
 
 	Object moon;
 	Object land;
 	Object water;
+
+	int deathHeight;
 
 	bool simulating;
 };
